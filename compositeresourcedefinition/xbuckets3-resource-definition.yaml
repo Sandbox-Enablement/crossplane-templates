@@ -1,0 +1,38 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xbuckets3s.s3.anycompany.com
+spec:
+  group: s3.anycompany.com
+  names:
+    kind: XBucketS3
+    plural: xbuckets3s
+  claimNames:
+    kind: BucketS3Claim
+    plural: buckets3claims
+  versions:
+    - name: v1alpha1
+      served: true
+      referenced: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                parameters:
+                  type: object
+                  properties:
+                    bucketName:
+                      type: string
+                    region:
+                      type: string
+                    acl:
+                      type: string
+                    dataClassification:
+                      type: string
+                      description: "Classificação dos dados (ex: Sensitive, Standard)"
+                    kmsKeyArn:
+                      type: string
+                      description: "ARN da chave KMS para criptografia CMK, se necessário"

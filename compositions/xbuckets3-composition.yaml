@@ -1,0 +1,81 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: xbuckets3s
+spec:
+  compositeTypeRef:
+    apiVersion: s3.anycompany.com/v1alpha1
+    kind: XBucketS3
+  resources:
+    - name: s3bucket
+      base:
+        apiVersion: s3.aws.upbound.io/v1beta1
+        kind: Bucket
+        spec:
+          forProvider:
+            # 1. Bloqueio de Acesso Público - Ativa bloqueio total no bucket
+            publicAccessBlockConfiguration:
+              blockPublicAcls: true
+              ignorePublicAcls: true
+              blockPublicPolicy: true
+              restrictPublicBuckets: true
+
+            # 2. Criptografia em repouso obrigatória com SSE-KMS
+            serverSideEncryptionConfiguration:
+              - rule:
+                  applyServerSideEncryptionByDefault:
+                    sseAlgorithm: aws:kms
+                    # Para dados sensíveis, usar CMK (Customer Managed Key)
+                    # Adicione o ARN da CMK se necessário:
+                    # kmsMasterKeyID: {{ .parameters.kmsKeyArn }}
+
+            # 3. Versionamento obrigatório para buckets críticos/sensíveis/logs
+            versioningConfiguration:
+              status: Enabled
+
+            # 4. Região e ACL vindos da claim
+            region: us-east-1
+            acl: private
+
+            # 5. Tags para classificação de dados e governança
+            tags:
+              - key: DataClassification
+                value: {{ .parameters.dataClassification | default "Standard" }}
+              # Adicione outras tags conforme necessário
+
+            # 6. Política para negar acesso sem SecureTransport (TLS)
+            policy: |
+              {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Sid": "DenyUnencryptedTransport",
+                    "Effect": "Deny",
+                    "Principal": "*",
+                    "Action": "s3:*",
+                    "Resource": [
+                      "arn:aws:s3:::{{ .metadata.name }}",
+                      "arn:aws:s3:::{{ .metadata.name }}/*"
+                    ],
+                    "Condition": {
+                      "Bool": {
+                        "aws:SecureTransport": "false"
+                      }
+                    }
+                  }
+                  # Adicione outras regras para restringir Principal "*" e aplicar menor privilégio
+                ]
+              }
+      patches:
+        - fromFieldPath: "spec.parameters.bucketName"
+          toFieldPath: "metadata.name"
+        - fromFieldPath: "spec.parameters.region"
+          toFieldPath: "spec.forProvider.region"
+        - fromFieldPath: "spec.parameters.acl"
+          toFieldPath: "spec.forProvider.acl"
+        - fromFieldPath: "spec.parameters.dataClassification"
+          toFieldPath: "spec.forProvider.tags[0].value"
+        # Adicione patch para CMK se necessário:
+        # - fromFieldPath: "spec.parameters.kmsKeyArn"
+        #   toFieldPath: "spec.forProvider.serverSideEncryptionConfiguration[0].rule.applyServerSideEncryptionByDefault.kmsMasterKeyID"
+
