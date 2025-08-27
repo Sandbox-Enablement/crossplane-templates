@@ -61,3 +61,41 @@ spec:
                 fmt: "DataClassification=%s"
         - fromFieldPath: "spec.parameters.kmsKeyArn"
           toFieldPath: "spec.forProvider.serverSideEncryptionConfiguration[0].rule.applyServerSideEncryptionByDefault.kmsMasterKeyID"
+
+    - name: ApllicationSetArgoControlAddons
+      base:
+        apiVersion: kubernetes.crossplane.io/v1alpha2
+        kind: Object
+        spec:
+          deletionPolicy: Orphan
+          forProvider:
+            manifest:
+              apiVersion: argoproj.io/v1alpha1
+              kind: ApplicationSet
+              metadata:
+                name: cluster-addons
+                namespace: argocd
+              spec:
+                syncPolicy:
+                  preserveResourcesOnDeletion: true
+                generators:
+                  - clusters: {}
+                template:
+                  metadata:
+                    name: cluster-addons
+                  spec:
+                    project: default
+                    source:
+                      repoURL: '{{metadata.annotations.addons_repo_url}}'
+                      path: '{{metadata.annotations.addons_repo_basepath}}{{metadata.annotations.addons_repo_path}}'
+                      targetRevision: '{{metadata.annotations.addons_repo_revision}}'
+                      directory:
+                        recurse: true
+                    destination:
+                      namespace: argocd
+                      server: '{{metadata.annotations.addons_destination_server}}'
+                    syncPolicy:
+                      automated: {}
+      patches:
+        - fromFieldPath: spec.id
+          toFieldPath: spec.providerConfigRef.name
