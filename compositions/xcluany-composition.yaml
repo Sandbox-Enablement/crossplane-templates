@@ -13,7 +13,7 @@ spec:
       name: crossplane-contrib-function-patch-and-transform
     step: patch-and-transform
     input:
-      apiVersion: pt.fn.crossplane.io/v1beta1
+      apiVersion: pt.fn.crossplane.io/v1beta1 #kleber-check
       kind: Resources
 
       patchSets:
@@ -1214,7 +1214,7 @@ spec:
 
       - name: ApllicationSetArgoControlAddons
         base:
-          apiVersion: kubernetes.crossplane.io/v1alpha2
+          apiVersion: kubernetes.crossplane.io/v1alpha2 #kleber-check
           kind: Object
           spec:
             deletionPolicy: Orphan
@@ -1255,7 +1255,7 @@ spec:
 # SSH Secret will be used to Argocd to access the repo
       - name: SecretArgoSSH
         base:
-          apiVersion: kubernetes.crossplane.io/v1alpha2
+          apiVersion: kubernetes.crossplane.io/v1alpha2 #kleber-check
           kind: Object
           spec:
             deletionPolicy: Orphan
@@ -1283,7 +1283,7 @@ spec:
 
       - name: SecretArgo
         base:
-          apiVersion: kubernetes.crossplane.io/v1alpha2
+          apiVersion: kubernetes.crossplane.io/v1alpha2 #kleber-check
           kind: Object
           spec:
             deletionPolicy: Orphan
@@ -1381,7 +1381,7 @@ spec:
 
       - name: helm
         base:
-          apiVersion: helm.crossplane.io/v1beta1
+          apiVersion: helm.crossplane.io/v1beta1 #kleber-check
           kind: ProviderConfig
           spec:
             credentials:
@@ -1404,7 +1404,7 @@ spec:
         - type: None
       - name: helm-local
         base:
-          apiVersion: helm.crossplane.io/v1beta1
+          apiVersion: helm.crossplane.io/v1beta1 #kleber-check
           kind: ProviderConfig
           spec:
             credentials:
@@ -1424,7 +1424,7 @@ spec:
 
       - name: kubernetes
         base:
-          apiVersion: kubernetes.crossplane.io/v1alpha1
+          apiVersion: kubernetes.crossplane.io/v1alpha1 #kleber-check
           kind: ProviderConfig
           spec:
             credentials:
@@ -1450,12 +1450,12 @@ spec:
       name: crossplane-contrib-function-go-templating
     step: app-crossplane
     input:
-      apiVersion: gotemplating.fn.crossplane.io/v1beta1
+      apiVersion: gotemplating.fn.crossplane.io/v1beta1 #kleber-check
       inline:
         template: |-
           {{ if .observed.composite.resource.spec.parameters.apps.crossplane.enabled }}
           ---
-          apiVersion: helm.crossplane.io/v1beta1
+          apiVersion: helm.crossplane.io/v1beta1 #kleber-check
           kind: Release
           metadata:
             name: '{{ $.observed.composite.resource.spec.id }}-app-crossplane'
@@ -1488,7 +1488,7 @@ spec:
         template: |-
           {{ range .observed.composite.resource.spec.parameters.namespaces }}
           ---
-          apiVersion: kubernetes.crossplane.io/v1alpha2
+          apiVersion: kubernetes.crossplane.io/v1alpha2 #kleber-check
           kind: Object
           metadata:
             name: {{ $.observed.composite.resource.spec.id }}-ns-{{ . }}
@@ -1518,7 +1518,7 @@ spec:
         template: |-
           {{ if .observed.composite.resource.spec.parameters.apps.argocd.enabled }}
           ---
-          apiVersion: helm.crossplane.io/v1beta1
+          apiVersion: helm.crossplane.io/v1beta1 #kleber-check
           kind: Release
           metadata:
             name: '{{ $.observed.composite.resource.spec.id }}-argocd'
